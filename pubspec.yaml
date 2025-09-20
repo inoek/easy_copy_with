@@ -1,0 +1,28 @@
+name: easy_copy_with
+description: Package for automatic generation of copyWith methods in Dart classes using @CopyWith annotation.
+version: 1.0.0
+homepage: https://github.com/inoek/easy_copy_with
+repository: https://github.com/inoek/easy_copy_with
+issue_tracker: https://github.com/inoek/easy_copy_with/issues
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  meta: ^1.17.0
+  build: 4.0.0
+  source_gen: 4.0.1
+  analyzer: 8.1.1
+
+dev_dependencies:
+  test: ^1.26.3
+  build_runner: ^2.8.0
+  lints: 6.0.0
+  build_test: ^3.4.0
+  source_gen_test: ^1.1.0
+
+topics:
+  - codegen
+  - copy-with
+  - code-generation
+  - annotation

@@ -1,0 +1,17 @@
+# Configuration for dart test
+# https://dart.dev/tools/dart-test#configuration
+
+# Test runner configuration
+test_on: vm
+
+# Timeout for tests
+timeout: 30s
+
+# Test concurrency
+concurrency: 4
+
+# Reporter configuration
+reporter: expanded
+
+# Retry configuration
+retry: 1

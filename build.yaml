@@ -1,0 +1,13 @@
+targets:
+  $default:
+    builders:
+      easy_copy_with:copy_with:
+        enabled: true
+
+builders:
+  copy_with:
+    import: "package:easy_copy_with/src/builder.dart"
+    builder_factories: ["copyWithBuilder"]
+    build_extensions: {".dart": [".g.dart"]}
+    auto_apply: dependents
+    build_to: source

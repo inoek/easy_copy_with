@@ -1,0 +1,15 @@
+name: easy_copy_with_example
+description: Example usage of easy_copy_with package
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  easy_copy_with:
+    path: ../
+
+dev_dependencies:
+  build_runner: ^2.8.0
+  source_gen: 4.0.1

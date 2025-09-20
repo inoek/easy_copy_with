@@ -1,0 +1,5 @@
+targets:
+  $default:
+    builders:
+      easy_copy_with:copy_with:
+        enabled: true
