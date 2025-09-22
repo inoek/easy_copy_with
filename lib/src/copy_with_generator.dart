@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
 import '../annotations.dart';
@@ -7,10 +9,10 @@ import '../annotations.dart';
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   @override
   FutureOr<String> generateForAnnotatedElement(
-    Element element,
-    ConstantReader annotation,
-    BuildStep buildStep,
-  ) {
+      Element element,
+      ConstantReader annotation,
+      BuildStep buildStep,
+      ) {
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
         'CopyWith annotation can only be applied to classes.',
@@ -26,8 +28,22 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       );
     }
 
-    final fields = _getFields(element);
+    if (element.isAbstract) {
+      throw InvalidGenerationSourceError(
+        'Cannot generate copyWith for abstract class $className.',
+        element: element,
+      );
+    }
 
+    final constructor = _findSuitableConstructor(element);
+    if (constructor == null) {
+      throw InvalidGenerationSourceError(
+        'No suitable constructor found for $className.',
+        element: element,
+      );
+    }
+
+    final fields = _getFields(element);
     if (fields.isEmpty) {
       return '';
     }
@@ -39,12 +55,29 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     final classNameWithGenerics = '$className$typeParamsString';
 
-    final buffer = StringBuffer()
-      ..writeln('extension ${className}CopyWith$typeParamsString on $classNameWithGenerics {')
-      ..writeln(_generateCopyWithMethod(classNameWithGenerics, fields))
-      ..writeln('}');
+    final buffer = StringBuffer();
+
+    buffer.writeln('extension ${className}CopyWith$typeParamsString on $classNameWithGenerics {');
+    buffer.writeln(_generateCopyWithMethod(classNameWithGenerics, fields, className));
+    buffer.writeln('}');
 
     return buffer.toString();
+  }
+
+
+  ConstructorElement? _findSuitableConstructor(ClassElement classElement) {
+    final unnamed = classElement.unnamedConstructor;
+    if (unnamed != null && !unnamed.isPrivate && !unnamed.isFactory) {
+      return unnamed;
+    }
+
+    try {
+      return classElement.constructors.firstWhere(
+            (c) => !c.isPrivate && !c.isFactory,
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
   List<FieldElement> _getFields(ClassElement classElement) {
@@ -53,17 +86,20 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         .toList();
   }
 
-  String _generateCopyWithMethod(String className, List<FieldElement> fields) {
-    const sentinelValue = 'const Object()';
-
+  String _generateCopyWithMethod(
+      String className,
+      List<FieldElement> fields,
+      String classBaseName,
+      ) {
     final buffer = StringBuffer()
       ..writeln('  $className copyWith({');
 
     for (final field in fields) {
-      var fieldType = field.type.getDisplayString();
-      if (fieldType.endsWith('?')) {
-        fieldType = fieldType.substring(0, fieldType.length - 1);
-        buffer.writeln('    Object? ${field.name} = $sentinelValue,');
+      final fieldType = field.type.getDisplayString();
+      final isNullable = field.type.nullabilitySuffix == NullabilitySuffix.question;
+
+      if (isNullable) {
+        buffer.writeln('    Object? ${field.name} = const Object(),');
       } else {
         buffer.writeln('    $fieldType? ${field.name},');
       }
@@ -73,13 +109,16 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       ..writeln('  }) {')
       ..writeln('    return $className(');
 
-    // Generate field assignments
     for (final field in fields) {
-      final fieldType = field.type.getDisplayString();
-      if (fieldType.endsWith('?')) {
-        buffer.writeln('      ${field.name}: ${field.name} == $sentinelValue ? this.${field.name} : ${field.name} as $fieldType,');
+      final fieldName = field.name;
+      final isNullable = field.type.nullabilitySuffix == NullabilitySuffix.question;
+
+      buffer.write('      $fieldName: ');
+
+      if (isNullable) {
+        buffer.writeln('$fieldName == const Object() ? this.$fieldName : $fieldName as ${_getBaseTypeString(field.type)}?,');
       } else {
-        buffer.writeln('      ${field.name}: ${field.name} ?? this.${field.name},');
+        buffer.writeln('$fieldName ?? this.$fieldName,');
       }
     }
 
@@ -88,5 +127,16 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       ..writeln('  }');
 
     return buffer.toString();
+  }
+
+  String _getBaseTypeString(DartType type) {
+    final typeStr = type.getDisplayString();
+
+    if (type.nullabilitySuffix == NullabilitySuffix.question &&
+        typeStr.endsWith('?')) {
+      return typeStr.substring(0, typeStr.length - 1);
+    }
+
+    return typeStr;
   }
 }

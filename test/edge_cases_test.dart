@@ -144,7 +144,7 @@ void main() {
 
       test('null ?? null returns null for nullable fields', () {
         const item = NullableFields(required: 'test');
-        final copy = item.copyWith(); // No parameters
+        final copy = item.copyWith();
 
         expect(copy.required, equals('test'));
         expect(copy.optional, isNull);
@@ -170,7 +170,6 @@ void main() {
 
         final copy = original.copyWith(data2: 43);
 
-        // Data1 and data3 should be the same references
         expect(copy.data1, same(original.data1));
         expect(copy.data3, same(original.data3));
         expect(copy.data2, equals(43));
@@ -207,7 +206,6 @@ void main() {
   });
 }
 
-// Test classes for edge cases
 
 @CopyWith()
 class SingleString {

@@ -19,7 +19,7 @@ void main() {
 
         expect(updated.name, equals('John'));
         expect(updated.age, equals(31));
-        expect(person.age, equals(30)); // Original unchanged
+        expect(person.age, equals(30));
       });
 
       test('copyWith changes multiple fields', () {
@@ -36,7 +36,7 @@ void main() {
 
         expect(copy.name, equals(person.name));
         expect(copy.age, equals(person.age));
-        expect(copy == person, isFalse); // Different instances
+        expect(copy == person, isFalse);
       });
     });
 
@@ -58,15 +58,6 @@ void main() {
         expect(updated.age, equals(30));
       });
 
-      // TODO: Fix explicit null handling in generator
-      // test('copyWith can set nullable field to null explicitly', () {
-      //   const user = User(name: 'John', email: 'john@example.com', age: 30);
-      //   final updated = user.copyWith(email: null, age: null);
-
-      //   expect(updated.name, equals('John'));
-      //   expect(updated.email, isNull);
-      //   expect(updated.age, isNull);
-      // });
 
       test('copyWith preserves null values when not specified', () {
         const user = User(name: 'John');
@@ -102,7 +93,7 @@ void main() {
         );
 
         expect(updated.settings, equals({'theme': 'light', 'language': 'es'}));
-        expect(updated.features, equals(['feature1'])); // Unchanged
+        expect(updated.features, equals(['feature1']));
         expect(updated.metadata, equals({'version': '1.0'}));
       });
 
@@ -117,7 +108,6 @@ void main() {
 
         final updated = config.copyWith(metadata: {'new': 'data'});
 
-        // Should preserve original references when not changed
         expect(updated.settings, same(originalSettings));
         expect(updated.features, same(originalFeatures));
       });
@@ -171,7 +161,6 @@ void main() {
   });
 }
 
-// Test classes
 @CopyWith()
 class Person {
   final String name;

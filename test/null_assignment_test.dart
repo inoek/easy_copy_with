@@ -15,17 +15,15 @@ void main() {
       const String? nullValue = null;
       const int? nullAge = null;
 
-      // Это должно присвоить null полям email и age
       final updated = model.copyWith(
         email: nullValue,
         age: nullAge,
       );
 
-      expect(updated.name, equals('John')); // Не изменилось
-      expect(updated.email, isNull); // Должно быть null
-      expect(updated.age, isNull); // Должно быть null
+      expect(updated.name, equals('John'));
+      expect(updated.email, isNull);
+      expect(updated.age, isNull);
 
-      // Проверяем что оригинальная модель не изменилась
       expect(model.email, equals('john@example.com'));
       expect(model.age, equals(30));
     });
@@ -37,7 +35,6 @@ void main() {
         age: 25,
       );
 
-      // Прямое присвоение null
       final updated = model.copyWith(
         email: null,
         age: null,
@@ -59,8 +56,8 @@ void main() {
       const int newAge = 41;
 
       final updated = model.copyWith(
-        email: nullEmail, // null
-        age: newAge, // новое значение
+        email: nullEmail,
+        age: newAge,
       );
 
       expect(updated.name, equals('Bob'));
@@ -71,7 +68,6 @@ void main() {
     test('should preserve existing null values', () {
       const model = TestModel(
         name: 'Alice',
-        // email и age изначально null
       );
 
       final updated = model.copyWith(

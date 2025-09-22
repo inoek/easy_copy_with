@@ -1,5 +1,3 @@
-// Test runner that imports working test files
-// Run with: dart test test/all_test.dart
 
 import 'annotations_test.dart' as annotations;
 import 'simple_test.dart' as simple;

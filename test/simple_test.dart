@@ -11,7 +11,7 @@ void main() {
 
       expect(updated.name, equals('John'));
       expect(updated.age, equals(31));
-      expect(person.age, equals(30)); // Original unchanged
+      expect(person.age, equals(30));
     });
 
     test('multiple field changes work', () {

@@ -20,8 +20,6 @@ void main() {
     });
 
     test('should be usable as metadata', () {
-      // This test verifies that the annotation can be used as metadata
-      // The actual functionality is tested in the generator tests
       expect(() => const TestClassWithAnnotation(name: 'test', value: 42), returnsNormally);
     });
   });
