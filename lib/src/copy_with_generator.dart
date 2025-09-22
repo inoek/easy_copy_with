@@ -55,11 +55,11 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     final classNameWithGenerics = '$className$typeParamsString';
 
-    final buffer = StringBuffer();
+    final buffer = StringBuffer()
 
-    buffer.writeln('extension ${className}CopyWith$typeParamsString on $classNameWithGenerics {');
-    buffer.writeln(_generateCopyWithMethod(classNameWithGenerics, fields, className));
-    buffer.writeln('}');
+    ..writeln('extension ${className}CopyWith$typeParamsString on $classNameWithGenerics {')
+    ..writeln(_generateCopyWithMethod(classNameWithGenerics, fields, className))
+    ..writeln('}');
 
     return buffer.toString();
   }
