@@ -43,7 +43,7 @@ import 'package:easy_copy_with/easy_copy_with.dart';
 2. **Add part directive:**
 
 ```dart
-part 'your_file.copy_with.g.dart';
+part 'your_file.copy_with.dart';
 ```
 
 3. **Annotate your class:**
@@ -81,7 +81,7 @@ final olderPerson = person.copyWith(age: 31);
 ```dart
 import 'package:easy_copy_with/easy_copy_with.dart';
 
-part 'user.copy_with.g.dart';
+part 'user.copy_with.dart';
 
 @CopyWith()
 class User {
@@ -115,9 +115,18 @@ void main() {
 }
 ```
 
-## Generated Code
+## How It Works
 
 The package uses `source_gen` and `build_runner` to analyze classes with the `@CopyWith` annotation and generate extension methods at build time.
+
+### Code Generation Process
+
+1. **Analysis**: The generator scans for classes annotated with `@CopyWith`
+2. **Validation**: Ensures the class is not abstract and has a suitable constructor
+3. **Field Detection**: Identifies all non-static, non-synthetic fields
+4. **Extension Generation**: Creates a `copyWith` method as an extension
+
+### Generated Code Structure
 
 For the example above, the generated code looks like:
 
@@ -126,18 +135,57 @@ extension UserCopyWith on User {
   User copyWith({
     String? name,
     int? age,
-    String? email,
+    Object? email = const Object(),
     bool? isActive,
   }) {
     return User(
       name: name ?? this.name,
       age: age ?? this.age,
-      email: email ?? this.email,
+      email: email == const Object() ? this.email : email as String?,
       isActive: isActive ?? this.isActive,
     );
   }
 }
 ```
+
+### Nullable Field Handling
+
+The generator handles nullable and non-nullable fields differently:
+
+- **Non-nullable fields** (e.g., `String name`): Parameter type becomes nullable (`String? name`) and uses null-coalescing operator (`??`)
+- **Nullable fields** (e.g., `String? email`): Uses `Object?` parameter with sentinel value (`const Object()`) to distinguish between "don't change" and "set to null"
+
+This approach allows you to explicitly set nullable fields to `null`:
+
+```dart
+// Set email to null
+final userWithoutEmail = user.copyWith(email: null);
+
+// Keep existing email value
+final userSameEmail = user.copyWith(name: 'New Name');
+```
+
+### File Extensions
+
+By default, generated files use the `.copy_with.dart` extension. You can customize this in your `build.yaml`:
+
+```yaml
+targets:
+  $default:
+    builders:
+      easy_copy_with:copy_with:
+        options:
+          output_extension: ".g.dart"  # Use .g.dart instead
+```
+
+### Supported Class Types
+
+The generator works with:
+- ✅ Regular classes with named constructors
+- ✅ Classes with generic type parameters
+- ✅ Classes with nullable and non-nullable fields
+- ❌ Abstract classes
+- ❌ Classes without suitable constructors
 
 ## Commands
 
