@@ -2,6 +2,8 @@ name: easy_copy_with_example
 description: Example usage of easy_copy_with package
 version: 1.0.0
 publish_to: none
+homepage: https://github.com/inoek/easy_copy_with
+repository: https://github.com/inoek/easy_copy_with
 
 environment:
   sdk: ^3.9.2

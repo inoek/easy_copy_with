@@ -1,2 +1,8 @@
 # Exclude generated files from publishing
 **/*.g.dart
+example/example.g.dart
+example/simple_test.g.dart
+test/edge_cases_test.g.dart
+test/integration_test.g.dart
+test/null_assignment_test.g.dart
+test/simple_test.g.dart
