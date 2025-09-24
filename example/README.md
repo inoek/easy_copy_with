@@ -5,21 +5,13 @@
 ## Запуск примера
 
 ```bash
-# Установить зависимости
 dart pub get
-
-# Сгенерировать код
-dart run build_runner build
-
-# Запустить примеры
 dart run example.dart
-dart run simple_test.dart
 ```
 
 ## Файлы
 
-- `example.dart` - полный пример с двумя классами (Person и Address)
-- `simple_test.dart` - простой пример с одним классом
+- `example.dart` — готовый к запуску пример с классом `User`
 - `pubspec.yaml` - зависимости для примера
 - `build.yaml` - конфигурация генератора
 
@@ -32,20 +24,24 @@ dart run simple_test.dart
 
 ## Сгенерированный код
 
-Генератор создает extension методы для каждого класса с аннотацией `@CopyWith()`:
+Генератор создает расширения, которые позволяют безопасно обновлять поля:
 
 ```dart
-extension PersonCopyWith on Person {
-  Person copyWith({
-    String? name,
-    int? age,
-    String? email,
+typedef UserCopyWithFn =
+    User Function({String? name, int? age, String? email, bool? isActive});
+
+extension UserCopyWith on User {
+  UserCopyWithFn get copyWith => _copyWith;
+
+  UserCopyWithFn _copyWith({
+    Object? name = _userCopyWithPlaceholder,
+    Object? age = _userCopyWithPlaceholder,
+    Object? email = _userCopyWithPlaceholder,
+    Object? isActive = _userCopyWithPlaceholder,
   }) {
-    return Person(
-      name: name ?? this.name,
-      age: age ?? this.age,
-      email: email ?? this.email,
-    );
+    // ...
   }
 }
 ```
+
+Код выше упрощен, полный вариант доступен в `example.g.dart`.

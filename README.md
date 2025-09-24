@@ -1,7 +1,7 @@
 # Easy CopyWith
 
 [![pub package](https://img.shields.io/pub/v/easy_copy_with.svg)](https://pub.dev/packages/easy_copy_with)
-[![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 A lightweight Dart package for automatic generation of `copyWith` methods using the `@CopyWith` annotation.
 
@@ -81,7 +81,7 @@ final olderPerson = person.copyWith(age: 31);
 ```dart
 import 'package:easy_copy_with/easy_copy_with.dart';
 
-part 'user.copy_with.dart';
+part 'example.g.dart';
 
 @CopyWith()
 class User {
@@ -99,21 +99,24 @@ class User {
 }
 
 void main() {
-  final user = User(name: 'Alice', age: 25);
-
-  // Create copy with single field change
-  final updatedUser = user.copyWith(age: 26);
-
-  // Create copy with multiple field changes
-  final activeUser = user.copyWith(
+  const user = User(
+    name: 'Alice',
+    age: 25,
     email: 'alice@example.com',
-    isActive: true,
   );
 
-  print('Original: ${user.name}, ${user.age}');
-  print('Updated: ${updatedUser.name}, ${updatedUser.age}');
+  final older = user.copyWith(age: 26);
+  final renamed = older.copyWith(name: 'Alicia');
+  final withoutEmail = renamed.copyWith(email: null);
+
+  print(user);
+  print(older);
+  print(renamed);
+  print(withoutEmail);
 }
 ```
+
+You can run the complete working sample with `dart run example/example.dart`.
 
 ## How It Works
 
@@ -131,19 +134,38 @@ The package uses `source_gen` and `build_runner` to analyze classes with the `@C
 For the example above, the generated code looks like:
 
 ```dart
+typedef UserCopyWithFn =
+    User Function({String? name, int? age, String? email, bool? isActive});
+
+const Object _userCopyWithPlaceholder = Object();
+
 extension UserCopyWith on User {
-  User copyWith({
-    String? name,
-    int? age,
-    Object? email = const Object(),
-    bool? isActive,
-  }) {
-    return User(
-      name: name ?? this.name,
-      age: age ?? this.age,
-      email: email == const Object() ? this.email : email as String?,
-      isActive: isActive ?? this.isActive,
-    );
+  UserCopyWithFn get copyWith {
+    final instance = this;
+    User copyWithFn({
+      Object? name = _userCopyWithPlaceholder,
+      Object? age = _userCopyWithPlaceholder,
+      Object? email = _userCopyWithPlaceholder,
+      Object? isActive = _userCopyWithPlaceholder,
+    }) {
+      return User(
+        name: identical(name, _userCopyWithPlaceholder) || name == null
+            ? instance.name
+            : name as String,
+        age: identical(age, _userCopyWithPlaceholder) || age == null
+            ? instance.age
+            : age as int,
+        email: identical(email, _userCopyWithPlaceholder)
+            ? instance.email
+            : email as String?,
+        isActive:
+            identical(isActive, _userCopyWithPlaceholder) || isActive == null
+            ? instance.isActive
+            : isActive as bool,
+      );
+    }
+
+    return copyWithFn as UserCopyWithFn;
   }
 }
 ```
@@ -152,8 +174,8 @@ extension UserCopyWith on User {
 
 The generator handles nullable and non-nullable fields differently:
 
-- **Non-nullable fields** (e.g., `String name`): Parameter type becomes nullable (`String? name`) and uses null-coalescing operator (`??`)
-- **Nullable fields** (e.g., `String? email`): Uses `Object?` parameter with sentinel value (`const Object()`) to distinguish between "don't change" and "set to null"
+- **Non-nullable fields** (e.g., `String name`): Parameters remain type-safe (`String? name`) while still preventing unintended null assignment in the generated body.
+- **Nullable fields** (e.g., `String? email`): Internally use a sentinel value to distinguish between "don't change" and "set to null", allowing you to pass `null` explicitly.
 
 This approach allows you to explicitly set nullable fields to `null`:
 
@@ -211,4 +233,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the BSD 3-Clause License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.

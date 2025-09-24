@@ -48,6 +48,10 @@ app.*.map.json
 *.freezed.dart
 *.mocks.dart
 
+# Keep generated example outputs so the published example works out of the box.
+!example/*.g.dart
+!example/lib/**/*.g.dart
+
 # Coverage
 coverage/
 
