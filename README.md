@@ -10,7 +10,7 @@ A lightweight Dart package for automatic generation of `copyWith` methods using 
 - 🚀 Simple annotation-based API
 - ⚡ Build-time code generation (no runtime overhead)
 - 🔄 Supports nullable and non-nullable fields
-- 🎯 Compatible with freezed patterns
+- 🎯 Compatible with correct type handling
 - 📦 Minimal dependencies
 - 🛠️ Easy integration with existing projects
 
