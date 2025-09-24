@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.0] - TBD
+## [2.0.0] - TBD
 - copyWith parameters now preserve the original field types, including generics and nullability
 - sentinel-backed parameters allow assigning `null` without manual casts
 - packaged runnable example at `example/example.dart` and updated documentation to match
