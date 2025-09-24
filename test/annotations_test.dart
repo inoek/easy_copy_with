@@ -1,6 +1,8 @@
 import 'package:test/test.dart';
 import 'package:easy_copy_with/annotations.dart';
 
+part 'annotations_test.g.dart';
+
 void main() {
   group('CopyWith annotation', () {
     test('should be instantiable', () {

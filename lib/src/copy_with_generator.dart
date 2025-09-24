@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
@@ -9,10 +8,10 @@ import '../annotations.dart';
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   @override
   FutureOr<String> generateForAnnotatedElement(
-      Element element,
-      ConstantReader annotation,
-      BuildStep buildStep,
-      ) {
+    Element element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) {
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
         'CopyWith annotation can only be applied to classes.',
@@ -55,15 +54,23 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     final classNameWithGenerics = '$className$typeParamsString';
 
-    final buffer = StringBuffer()
+    final placeholderName = '_${_toLowerCamel(className)}CopyWithPlaceholder';
 
-    ..writeln('extension ${className}CopyWith$typeParamsString on $classNameWithGenerics {')
-    ..writeln(_generateCopyWithMethod(classNameWithGenerics, fields, className))
-    ..writeln('}');
+    final buffer = StringBuffer()
+      ..writeln(_generateTypedef(className, typeParameters, fields))
+      ..writeln('const Object $placeholderName = Object();')
+      ..writeln(
+        _generateCopyWithExtension(
+          className: className,
+          classNameWithGenerics: classNameWithGenerics,
+          typeParameters: typeParameters,
+          fields: fields,
+          placeholderName: placeholderName,
+        ),
+      );
 
     return buffer.toString();
   }
-
 
   ConstructorElement? _findSuitableConstructor(ClassElement classElement) {
     final unnamed = classElement.unnamedConstructor;
@@ -73,7 +80,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     try {
       return classElement.constructors.firstWhere(
-            (c) => !c.isPrivate && !c.isFactory,
+        (c) => !c.isPrivate && !c.isFactory,
       );
     } catch (e) {
       return null;
@@ -86,57 +93,143 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         .toList();
   }
 
-  String _generateCopyWithMethod(
-      String className,
-      List<FieldElement> fields,
-      String classBaseName,
-      ) {
+  String _generateTypedef(
+    String className,
+    List<TypeParameterElement> typeParameters,
+    List<FieldElement> fields,
+  ) {
+    final typeParamsDeclaration = _typeParametersDeclaration(typeParameters);
+    final typeArgs = _typeArguments(typeParameters);
+    final typedefName = '${className}CopyWithFn';
+
     final buffer = StringBuffer()
-      ..writeln('  $className copyWith({');
+      ..writeln(
+        'typedef $typedefName$typeParamsDeclaration = $className$typeArgs Function({',
+      );
 
     for (final field in fields) {
-      final fieldType = field.type.getDisplayString();
-      final isNullable = field.type.nullabilitySuffix == NullabilitySuffix.question;
+      final paramType = _parameterTypeFor(field);
+      buffer.writeln('  $paramType ${field.name},');
+    }
 
-      if (isNullable) {
-        buffer.writeln('    Object? ${field.name} = const Object(),');
-      } else {
-        buffer.writeln('    $fieldType? ${field.name},');
-      }
+    buffer.writeln('});');
+    return buffer.toString();
+  }
+
+  String _generateCopyWithExtension({
+    required String className,
+    required String classNameWithGenerics,
+    required List<TypeParameterElement> typeParameters,
+    required List<FieldElement> fields,
+    required String placeholderName,
+  }) {
+    final typeParamsDeclaration = _typeParametersDeclaration(typeParameters);
+    final typeArgs = _typeArguments(typeParameters);
+    final typedefName = '${className}CopyWithFn';
+
+    final buffer = StringBuffer()
+      ..writeln(
+        'extension ${className}CopyWith$typeParamsDeclaration on $classNameWithGenerics {',
+      )
+      ..writeln('  $typedefName$typeParamsDeclaration get copyWith {')
+      ..writeln('    final instance = this;')
+      ..writeln('    $classNameWithGenerics copyWithFn({');
+
+    for (final field in fields) {
+      buffer.writeln('      Object? ${field.name} = $placeholderName,');
     }
 
     buffer
-      ..writeln('  }) {')
-      ..writeln('    return $className(');
+      ..writeln('    }) {')
+      ..writeln('      return $classNameWithGenerics(');
 
     for (final field in fields) {
-      final fieldName = field.name;
-      final isNullable = field.type.nullabilitySuffix == NullabilitySuffix.question;
-
-      buffer.write('      $fieldName: ');
-
-      if (isNullable) {
-        buffer.writeln('$fieldName == const Object() ? this.$fieldName : $fieldName as ${_getBaseTypeString(field.type)}?,');
-      } else {
-        buffer.writeln('$fieldName ?? this.$fieldName,');
-      }
+      buffer.writeln(
+        '        ${field.name}: ${_fieldAssignment(field, placeholderName)},',
+      );
     }
 
     buffer
-      ..writeln('    );')
-      ..writeln('  }');
+      ..writeln('      );')
+      ..writeln('    }')
+      ..writeln('    return copyWithFn as $typedefName$typeArgs;')
+      ..writeln('  }')
+      ..writeln('}');
 
     return buffer.toString();
   }
 
-  String _getBaseTypeString(DartType type) {
-    final typeStr = type.getDisplayString();
-
-    if (type.nullabilitySuffix == NullabilitySuffix.question &&
-        typeStr.endsWith('?')) {
-      return typeStr.substring(0, typeStr.length - 1);
+  String _typeParametersDeclaration(List<TypeParameterElement> typeParameters) {
+    if (typeParameters.isEmpty) {
+      return '';
     }
 
-    return typeStr;
+    final declaration = typeParameters
+        .map((param) {
+          final bound = param.bound;
+          if (bound == null) {
+            return param.name;
+          }
+
+          final boundType = bound.getDisplayString();
+          if (boundType == 'dynamic') {
+            return param.name;
+          }
+
+          return '${param.name} extends $boundType';
+        })
+        .join(', ');
+    return '<$declaration>';
+  }
+
+  String _typeArguments(List<TypeParameterElement> typeParameters) {
+    if (typeParameters.isEmpty) {
+      return '';
+    }
+
+    final args = typeParameters.map((param) => param.name).join(', ');
+    return '<$args>';
+  }
+
+  String _parameterTypeFor(FieldElement field) {
+    final fieldType = field.type.getDisplayString();
+    final isNullable =
+        field.type.nullabilitySuffix == NullabilitySuffix.question;
+
+    if (isNullable) {
+      return fieldType;
+    }
+
+    if (fieldType == 'dynamic') {
+      return fieldType;
+    }
+
+    return '$fieldType?';
+  }
+
+  String _fieldAssignment(FieldElement field, String placeholderName) {
+    final fieldName = field.name;
+    final fieldAccess = 'instance.$fieldName';
+    final fieldType = field.type.getDisplayString();
+    final isNullable =
+        field.type.nullabilitySuffix == NullabilitySuffix.question;
+
+    if (isNullable) {
+      return 'identical($fieldName, $placeholderName) ? $fieldAccess : $fieldName as $fieldType';
+    }
+
+    return 'identical($fieldName, $placeholderName) || $fieldName == null ? $fieldAccess : $fieldName as $fieldType';
+  }
+
+  String _toLowerCamel(String value) {
+    if (value.isEmpty) {
+      return value;
+    }
+
+    if (value.length == 1) {
+      return value.toLowerCase();
+    }
+
+    return value[0].toLowerCase() + value.substring(1);
   }
 }

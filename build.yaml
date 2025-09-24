@@ -3,6 +3,8 @@ targets:
     builders:
       easy_copy_with:copy_with:
         enabled: true
+        options:
+          output_extension: ".g.dart"
 
 builders:
   copy_with:
