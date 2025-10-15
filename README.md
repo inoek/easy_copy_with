@@ -20,7 +20,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  easy_copy_with: ^1.0.0
+  easy_copy_with: ^2.1.0
 
 dev_dependencies:
   build_runner: ^2.3.3
@@ -43,7 +43,7 @@ import 'package:easy_copy_with/easy_copy_with.dart';
 2. **Add part directive:**
 
 ```dart
-part 'your_file.copy_with.dart';
+part 'your_file.g.dart';
 ```
 
 3. **Annotate your class:**
@@ -189,7 +189,9 @@ final userSameEmail = user.copyWith(name: 'New Name');
 
 ### File Extensions
 
-By default, generated files use the `.copy_with.dart` extension. You can customize this in your `build.yaml`:
+By default, generated files use the `.g.dart` extension, so the generated code happily shares the same part file with other `source_gen` builders (for example `json_serializable` or `freezed`).
+
+If you prefer to keep a dedicated `.copy_with.dart` file, override the builder configuration in your project’s `build.yaml`:
 
 ```yaml
 targets:
@@ -197,7 +199,15 @@ targets:
     builders:
       easy_copy_with:copy_with:
         options:
-          output_extension: ".g.dart"  # Use .g.dart instead
+          output_extension: ".copy_with.dart"  # Use .copy_with.dart instead
+
+builders:
+  easy_copy_with:copy_with:
+    import: "package:easy_copy_with/src/builder.dart"
+    builder_factories: ["copyWithBuilder"]
+    build_extensions: {".dart": [".copy_with.dart"]}
+    auto_apply: dependents
+    build_to: source
 ```
 
 ### Supported Class Types

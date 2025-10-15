@@ -1,30 +1,42 @@
 # Easy CopyWith Example
 
-Этот пример демонстрирует использование пакета `easy_copy_with`.
+This example demonstrates how to use the `easy_copy_with` package.
 
-## Запуск примера
+## Quick Start
 
-```bash
-dart pub get
-dart run example.dart
-```
+Run every command from the `example/` directory.
 
-## Файлы
+1. Install dependencies:
+   ```bash
+   dart pub get
+   ```
+2. Generate the code (produces `lib/user.g.dart`):
+   ```bash
+   dart run build_runner build --delete-conflicting-outputs
+   ```
+3. Run the sample:
+   ```bash
+   dart run example.dart
+   ```
 
-- `example.dart` — готовый к запуску пример с классом `User`
-- `pubspec.yaml` - зависимости для примера
-- `build.yaml` - конфигурация генератора
+## Files
 
-## Как это работает
+- `example.dart` — executable sample that uses the `User` class
+- `lib/user.dart` — source model annotated with `@CopyWith`
+- `lib/user.g.dart` — generated `copyWith` extension
+- `pubspec.yaml` — example dependencies
+- `build.yaml` — minimal builder configuration
 
-1. Добавьте аннотацию `@CopyWith()` к классу
-2. Добавьте `part 'filename.g.dart';` директиву
-3. Запустите `dart run build_runner build`
-4. Используйте сгенерированный метод `copyWith()`
+## How It Works
 
-## Сгенерированный код
+1. Add the `@CopyWith()` annotation to a class
+2. Add the `part 'filename.g.dart';` directive next to the class declaration
+3. Run `dart run build_runner build`
+4. Use the generated `copyWith()` method
 
-Генератор создает расширения, которые позволяют безопасно обновлять поля:
+## Generated Code
+
+The generator creates extensions that let you safely update fields:
 
 ```dart
 typedef UserCopyWithFn =
@@ -44,4 +56,4 @@ extension UserCopyWith on User {
 }
 ```
 
-Код выше упрощен, полный вариант доступен в `example.g.dart`.
+The snippet above is trimmed for brevity; the full version lives in `lib/user.g.dart`.

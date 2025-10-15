@@ -3,13 +3,12 @@ targets:
     builders:
       easy_copy_with:copy_with:
         enabled: true
-        options:
-          output_extension: ".g.dart"
 
 builders:
   copy_with:
     import: "package:easy_copy_with/src/builder.dart"
     builder_factories: ["copyWithBuilder"]
-    build_extensions: {".dart": [".g.dart"]}
+    build_extensions: {".dart": [".copy_with.g.part"]}
     auto_apply: dependents
-    build_to: source
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
