@@ -6,13 +6,10 @@ Builder copyWithBuilder(BuilderOptions options) {
   final extension = options.config['output_extension'] as String? ?? '.g.dart';
 
   if (extension == '.g.dart') {
-    return SharedPartBuilder(
-      [CopyWithGenerator()],
-      'copy_with',
-    );
+    return SharedPartBuilder([const CopyWithGenerator()], 'copy_with');
   }
 
   // When developers opt into a custom extension we fall back to a dedicated
   // part file to mirror the previous behaviour.
-  return PartBuilder([CopyWithGenerator()], extension);
+  return PartBuilder([const CopyWithGenerator()], extension);
 }

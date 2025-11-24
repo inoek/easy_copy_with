@@ -6,6 +6,8 @@ import 'package:source_gen/source_gen.dart';
 import '../annotations.dart';
 
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
+  const CopyWithGenerator();
+
   @override
   FutureOr<String> generateForAnnotatedElement(
     Element element,
