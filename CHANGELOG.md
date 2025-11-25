@@ -1,5 +1,8 @@
 # Changelog
 
+## [3.1.0] - TBD
+- Added codegen for sealed classes.
+
 ## [3.0.0] - TBD
 - default output now targets `.g.dart` via a shared part builder, avoiding clashes with other `source_gen`-based packages like `json_serializable`
 - documented how to override the extension when a dedicated `.copy_with.dart` file is preferred

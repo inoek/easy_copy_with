@@ -6,6 +6,8 @@ import 'package:source_gen/source_gen.dart';
 import '../annotations.dart';
 
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
+  const CopyWithGenerator();
+
   @override
   FutureOr<String> generateForAnnotatedElement(
     Element element,
@@ -27,11 +29,15 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       );
     }
 
-    if (element.isAbstract) {
+    if (element.isAbstract && !element.isSealed) {
       throw InvalidGenerationSourceError(
         'Cannot generate copyWith for abstract class $className.',
         element: element,
       );
+    }
+
+    if (element.isSealed) {
+      return _generateForSealedClass(element: element);
     }
 
     final constructor = _findSuitableConstructor(element);
@@ -42,6 +48,17 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       );
     }
 
+    return _generateExtensionForClass(element);
+  }
+
+  String _generateExtensionForClass(ClassElement element) {
+    final className = element.name;
+    if (className == null) {
+      throw InvalidGenerationSourceError(
+        'Class name cannot be null.',
+        element: element,
+      );
+    }
     final fields = _getFields(element);
     if (fields.isEmpty) {
       return '';
@@ -55,7 +72,6 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final classNameWithGenerics = '$className$typeParamsString';
 
     final placeholderName = '_${_toLowerCamel(className)}CopyWithPlaceholder';
-
     final buffer = StringBuffer()
       ..writeln(_generateTypedef(className, typeParameters, fields))
       ..writeln('const Object $placeholderName = Object();')
@@ -88,9 +104,18 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   }
 
   List<FieldElement> _getFields(ClassElement classElement) {
-    return classElement.fields
+    final targetClassFields = classElement.fields
         .where((field) => !field.isStatic && !field.isSynthetic)
         .toList();
+    if (classElement.supertype?.element case final ClassElement superElement
+        when superElement.isSealed) {
+      final sealedFields = classElement.supertype?.element.fields
+          .where((field) => !field.isStatic && !field.isSynthetic)
+          .toList();
+
+      return [...?sealedFields, ...targetClassFields];
+    }
+    return targetClassFields;
   }
 
   String _generateTypedef(
@@ -231,5 +256,17 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     }
 
     return value[0].toLowerCase() + value.substring(1);
+  }
+
+  String _generateForSealedClass({required ClassElement element}) {
+    final factoryRedirectedConstructorClasses = element.constructors
+        .where((c) => c.isFactory)
+        .map((e) => e.redirectedConstructor?.enclosingElement as ClassElement)
+        .whereType<ClassElement>()
+        .toList();
+
+    return factoryRedirectedConstructorClasses
+        .map(_generateExtensionForClass)
+        .join('\n');
   }
 }
