@@ -161,7 +161,11 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       ..writeln('    $classNameWithGenerics copyWithFn({');
 
     for (final field in fields) {
-      buffer.writeln('      Object? ${field.name} = $placeholderName,');
+      final isNullsable =
+          field.type.nullabilitySuffix == NullabilitySuffix.question;
+      buffer.writeln(
+        '      Object${isNullsable ? '?' : ''} ${field.name} = $placeholderName,',
+      );
     }
 
     buffer
@@ -218,32 +222,16 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
   String _parameterTypeFor(FieldElement field) {
     final fieldType = field.type.getDisplayString();
-    final isNullable =
-        field.type.nullabilitySuffix == NullabilitySuffix.question;
 
-    if (isNullable) {
-      return fieldType;
-    }
-
-    if (fieldType == 'dynamic') {
-      return fieldType;
-    }
-
-    return '$fieldType?';
+    return fieldType;
   }
 
   String _fieldAssignment(FieldElement field, String placeholderName) {
     final fieldName = field.name;
     final fieldAccess = 'instance.$fieldName';
     final fieldType = field.type.getDisplayString();
-    final isNullable =
-        field.type.nullabilitySuffix == NullabilitySuffix.question;
 
-    if (isNullable) {
-      return 'identical($fieldName, $placeholderName) ? $fieldAccess : $fieldName as $fieldType';
-    }
-
-    return 'identical($fieldName, $placeholderName) || $fieldName == null ? $fieldAccess : $fieldName as $fieldType';
+    return 'identical($fieldName, $placeholderName) ? $fieldAccess : $fieldName as $fieldType';
   }
 
   String _toLowerCamel(String value) {

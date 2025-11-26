@@ -7,7 +7,7 @@ part of 'user.dart';
 // **************************************************************************
 
 typedef UserCopyWithFn =
-    User Function({String? name, int? age, String? email, bool? isActive});
+    User Function({String name, int age, String? email, bool isActive});
 
 const Object _userCopyWithPlaceholder = Object();
 
@@ -15,23 +15,22 @@ extension UserCopyWith on User {
   UserCopyWithFn get copyWith {
     final instance = this;
     User copyWithFn({
-      Object? name = _userCopyWithPlaceholder,
-      Object? age = _userCopyWithPlaceholder,
+      Object name = _userCopyWithPlaceholder,
+      Object age = _userCopyWithPlaceholder,
       Object? email = _userCopyWithPlaceholder,
-      Object? isActive = _userCopyWithPlaceholder,
+      Object isActive = _userCopyWithPlaceholder,
     }) {
       return User(
-        name: identical(name, _userCopyWithPlaceholder) || name == null
+        name: identical(name, _userCopyWithPlaceholder)
             ? instance.name
             : name as String,
-        age: identical(age, _userCopyWithPlaceholder) || age == null
+        age: identical(age, _userCopyWithPlaceholder)
             ? instance.age
             : age as int,
         email: identical(email, _userCopyWithPlaceholder)
             ? instance.email
             : email as String?,
-        isActive:
-            identical(isActive, _userCopyWithPlaceholder) || isActive == null
+        isActive: identical(isActive, _userCopyWithPlaceholder)
             ? instance.isActive
             : isActive as bool,
       );
