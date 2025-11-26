@@ -48,9 +48,12 @@ app.*.map.json
 *.freezed.dart
 *.mocks.dart
 
-# Keep generated example outputs so the published example works out of the box.
+# Keep generated example and test outputs so the published example works out
+# of the box and analyzer can run without codegen.
 !example/*.g.dart
 !example/lib/**/*.g.dart
+!test/*.g.dart
+!test/**/*.g.dart
 
 # Coverage
 coverage/
@@ -60,3 +63,5 @@ coverage/
 
 # VS Code settings folder
 .vscode/
+.fvm/flutter_sdk
+.fvm/versions/3.38.1

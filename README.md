@@ -20,7 +20,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  easy_copy_with: ^2.1.0
+  easy_copy_with: ^3.1.0
 
 dev_dependencies:
   build_runner: ^2.3.3
@@ -117,6 +117,43 @@ void main() {
 ```
 
 You can run the complete working sample with `dart run example/example.dart`.
+
+## Sealed Classes Support
+
+Starting from version 3.1.0, `easy_copy_with` supports `sealed` classes. The generator creates `copyWith` methods for each subclass defined in the sealed class hierarchy.
+
+```dart
+@CopyWith()
+sealed class Result {
+  const factory Result.success({required String value}) = Success;
+  const factory Result.error({required String message}) = Error;
+  
+  const Result._();
+}
+
+final class Success extends Result {
+  final String value;
+  const Success({required this.value}) : super._();
+}
+
+final class Error extends Result {
+  final String message;
+  const Error({required this.message}) : super._();
+}
+```
+
+You can then use `copyWith` on the specific subtypes:
+
+```dart
+void main() {
+  Result result = Success(value: 'Initial');
+  
+  if (result is Success) {
+    // The copyWith method is available on the casted type
+    final updated = result.copyWith(value: 'Updated'); 
+  }
+}
+```
 
 ## How It Works
 
@@ -216,7 +253,8 @@ The generator works with:
 - ✅ Regular classes with named constructors
 - ✅ Classes with generic type parameters
 - ✅ Classes with nullable and non-nullable fields
-- ❌ Abstract classes
+- ✅ Sealed classes (subclasses)
+- ❌ Abstract classes (except sealed classes)
 - ❌ Classes without suitable constructors
 
 ## Commands
@@ -234,7 +272,7 @@ dart run build_runner clean
 
 ## Requirements
 
-- Dart SDK: `>=3.9.2`
+- Dart SDK: `>=3.10.0`
 - Compatible with Flutter projects
 
 ## Contributing
