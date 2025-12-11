@@ -1,5 +1,8 @@
 # Changelog
 
+## [3.2.0] - 2025-12-11
+- Added generation general fields for sealed classes.
+
 ## [3.1.0] - 2025-11-26
 - Added codegen for sealed classes.
 
