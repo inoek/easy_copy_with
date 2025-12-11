@@ -7,7 +7,7 @@ part of 'sealed_class_test.dart';
 // **************************************************************************
 
 typedef IntValueSealedTestModelCopyWithFn =
-    IntValueSealedTestModel Function({int intValue});
+    IntValueSealedTestModel Function({int value});
 
 const Object _intValueSealedTestModelCopyWithPlaceholder = Object();
 
@@ -15,13 +15,12 @@ extension IntValueSealedTestModelCopyWith on IntValueSealedTestModel {
   IntValueSealedTestModelCopyWithFn get copyWith {
     final instance = this;
     IntValueSealedTestModel copyWithFn({
-      Object intValue = _intValueSealedTestModelCopyWithPlaceholder,
+      Object value = _intValueSealedTestModelCopyWithPlaceholder,
     }) {
       return IntValueSealedTestModel(
-        intValue:
-            identical(intValue, _intValueSealedTestModelCopyWithPlaceholder)
-            ? instance.intValue
-            : intValue as int,
+        value: identical(value, _intValueSealedTestModelCopyWithPlaceholder)
+            ? instance.value
+            : value as int,
       );
     }
 

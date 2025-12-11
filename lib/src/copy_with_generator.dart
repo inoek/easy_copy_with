@@ -65,15 +65,18 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     }
 
     final typeParameters = element.typeParameters;
-    final typeParamsString = typeParameters.isNotEmpty
-        ? '<${typeParameters.map((e) => e.name).join(', ')}>'
-        : '';
 
-    final classNameWithGenerics = '$className$typeParamsString';
+    final classNameWithGenerics = _getClassNameWithGenerics(element);
 
-    final placeholderName = '_${_toLowerCamel(className)}CopyWithPlaceholder';
+    final placeholderName = _makePlaceholderFor(className);
     final buffer = StringBuffer()
-      ..writeln(_generateTypedef(className, typeParameters, fields))
+      ..writeln(
+        _generateTypedef(
+          className,
+          typeParameters,
+          fields.map((e) => e.displayString()).toList(),
+        ),
+      )
       ..writeln('const Object $placeholderName = Object();')
       ..writeln(
         _generateCopyWithExtension(
@@ -86,6 +89,21 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       );
 
     return buffer.toString();
+  }
+
+  String _makePlaceholderFor(String className) {
+    return '_${_toLowerCamel(className)}CopyWithPlaceholder';
+  }
+
+  String _getClassNameWithGenerics(ClassElement element) {
+    final typeParameters = element.typeParameters;
+    final typeParamsString = typeParameters.isNotEmpty
+        ? '<${typeParameters.map((e) => e.name).join(', ')}>'
+        : '';
+
+    final classNameWithGenerics = '${element.name}$typeParamsString';
+
+    return classNameWithGenerics;
   }
 
   ConstructorElement? _findSuitableConstructor(ClassElement classElement) {
@@ -121,7 +139,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   String _generateTypedef(
     String className,
     List<TypeParameterElement> typeParameters,
-    List<FieldElement> fields,
+    List<String> fields,
   ) {
     final typeParamsDeclaration = _typeParametersDeclaration(typeParameters);
     final typeArgs = _typeArguments(typeParameters);
@@ -133,8 +151,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       );
 
     for (final field in fields) {
-      final paramType = _parameterTypeFor(field);
-      buffer.writeln('  $paramType ${field.name},');
+      buffer.writeln('  $field,');
     }
 
     buffer.writeln('});');
@@ -220,12 +237,6 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     return '<$args>';
   }
 
-  String _parameterTypeFor(FieldElement field) {
-    final fieldType = field.type.getDisplayString();
-
-    return fieldType;
-  }
-
   String _fieldAssignment(FieldElement field, String placeholderName) {
     final fieldName = field.name;
     final fieldAccess = 'instance.$fieldName';
@@ -247,14 +258,108 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   }
 
   String _generateForSealedClass({required ClassElement element}) {
-    final factoryRedirectedConstructorClasses = element.constructors
+    final factoryRedirectedConstructorClasses = _getFactoriesFrom(element);
+
+    final generalVairablesExtension = _generateForGeneralVariablesInSealedClass(
+      element: element,
+      factoryConstructors: factoryRedirectedConstructorClasses,
+    );
+
+    final factoryClassesGen = factoryRedirectedConstructorClasses
+        .map(_generateExtensionForClass)
+        .toList(growable: false);
+
+    return [?generalVairablesExtension, ...factoryClassesGen].join('\n');
+  }
+
+  List<ClassElement> _getFactoriesFrom(ClassElement element) {
+    return element.constructors
         .where((c) => c.isFactory)
         .map((e) => e.redirectedConstructor?.enclosingElement as ClassElement)
         .whereType<ClassElement>()
-        .toList();
+        .toList(growable: false);
+  }
 
-    return factoryRedirectedConstructorClasses
-        .map(_generateExtensionForClass)
-        .join('\n');
+  String? _generateForGeneralVariablesInSealedClass({
+    required ClassElement element,
+    required List<ClassElement> factoryConstructors,
+  }) {
+    final totalSameVariablesCount = factoryConstructors.length;
+
+    final uniqueFieldNames = factoryConstructors
+        .expand((e) => e.fields)
+        .map((e) => e.displayString())
+        .toSet();
+
+    final candidateFields = {for (final name in uniqueFieldNames) name: 0};
+
+    for (final factory in factoryConstructors) {
+      for (final field in factory.fields) {
+        candidateFields[field.displayString()] =
+            candidateFields[field.displayString()]! + 1;
+      }
+    }
+
+    final targetFields = candidateFields.entries
+        .where((e) => e.value == totalSameVariablesCount)
+        .map((e) => e.key)
+        .toList(growable: false);
+
+    if (targetFields.isEmpty) {
+      return null;
+    }
+
+    final className = element.name!;
+    final typeParameters = element.typeParameters;
+    final classNameWithGenerics = _getClassNameWithGenerics(element);
+    final buffer = StringBuffer()
+      ..writeln(_generateTypedef(className, typeParameters, targetFields))
+      ..writeln(
+        _generateExtesionForSealedClass(
+          className: className,
+          classNameWithGenerics: classNameWithGenerics,
+          typeParameters: typeParameters,
+          factories: _getFactoriesFrom(element),
+        ),
+      );
+
+    return buffer.toString();
+  }
+
+  String _generateExtesionForSealedClass({
+    required String className,
+    required String classNameWithGenerics,
+    required List<TypeParameterElement> typeParameters,
+    required List<ClassElement> factories,
+  }) {
+    final typeParamsDeclaration = _typeParametersDeclaration(typeParameters);
+    final typedefName = '${className}CopyWithFn';
+    final buffer = StringBuffer()
+      ..writeln(
+        'extension ${className}CopyWith$typeParamsDeclaration on $classNameWithGenerics {',
+      )
+      ..writeln('  $typedefName$typeParamsDeclaration get copyWith {')
+      ..writeln('    return switch (this) {')
+      ..write(_generateSwitchForFactoriesInSealedClass(factories))
+      ..writeln('    };')
+      ..writeln('  }')
+      ..writeln('}');
+
+    return buffer.toString();
+  }
+
+  String _generateSwitchForFactoriesInSealedClass(
+    List<ClassElement> factories,
+  ) {
+    final buffer = StringBuffer();
+
+    for (final (i, factory) in factories.indexed) {
+      final tempVarName = 'x$i';
+      buffer.writeln(
+        '      final ${factory.name} $tempVarName => $tempVarName.copyWith,',
+      );
+    }
+
+    return buffer.toString();
   }
 }

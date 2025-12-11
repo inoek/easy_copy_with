@@ -6,13 +6,13 @@ part 'sealed_class_test.g.dart';
 void main() {
   group('Sealed Class CopyWith', () {
     test('IntValueSealedTestModel copyWith', () {
-      const model = SealedTestModel.intValue(intValue: 42);
+      const model = SealedTestModel.intValue(value: 42);
       final copiedModel = (model as IntValueSealedTestModel).copyWith(
-        intValue: 100,
+        value: 100,
       );
 
       expect(model, isA<IntValueSealedTestModel>());
-      expect(copiedModel.intValue, 100);
+      expect(copiedModel.value, 100);
     });
 
     test('StringValueSealedTestModel copyWith', () {
@@ -29,7 +29,7 @@ void main() {
 
 @CopyWith()
 sealed class SealedTestModel {
-  const factory SealedTestModel.intValue({required int intValue}) =
+  const factory SealedTestModel.intValue({required int value}) =
       IntValueSealedTestModel;
 
   const factory SealedTestModel.stringValue({required String name}) =
@@ -39,9 +39,9 @@ sealed class SealedTestModel {
 }
 
 final class IntValueSealedTestModel extends SealedTestModel {
-  const IntValueSealedTestModel({required this.intValue}) : super._();
+  const IntValueSealedTestModel({required this.value}) : super._();
 
-  final int intValue;
+  final int value;
 }
 
 final class StringValueSealedTestModel extends SealedTestModel {

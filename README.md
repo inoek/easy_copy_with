@@ -20,10 +20,10 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  easy_copy_with: ^3.1.0
+  easy_copy_with: ^3.2.0
 
 dev_dependencies:
-  build_runner: ^2.3.3
+  build_runner: ^2.10.4
 ```
 
 Then run:
