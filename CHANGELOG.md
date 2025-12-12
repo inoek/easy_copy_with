@@ -1,5 +1,8 @@
 # Changelog
 
+## [3.2.2] - 2025-12-12
+- Fixed behavior where inherited fields were passed to typedef
+
 ## [3.2.1] - 2025-12-12
 - Fixes a crash in the generator when a sealed class contains a non-redirecting factory constructor
 
