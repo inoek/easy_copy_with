@@ -1,5 +1,8 @@
 # Changelog
 
+## [3.2.1] - 2025-12-12
+- Fixes a crash in the generator when a sealed class contains a non-redirecting factory constructor
+
 ## [3.2.0] - 2025-12-11
 - Added generation general fields for sealed classes.
 
