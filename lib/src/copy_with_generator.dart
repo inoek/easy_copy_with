@@ -275,7 +275,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   List<ClassElement> _getFactoriesFrom(ClassElement element) {
     return element.constructors
         .where((c) => c.isFactory)
-        .map((e) => e.redirectedConstructor?.enclosingElement as ClassElement)
+        .map((c) => c.redirectedConstructor?.enclosingElement)
         .whereType<ClassElement>()
         .toList(growable: false);
   }
