@@ -288,13 +288,16 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     final uniqueFieldNames = factoryConstructors
         .expand((e) => e.fields)
+        .where((e) => !e.isSynthetic && !e.isStatic)
         .map((e) => e.displayString())
         .toSet();
 
     final candidateFields = {for (final name in uniqueFieldNames) name: 0};
 
     for (final factory in factoryConstructors) {
-      for (final field in factory.fields) {
+      for (final field in factory.fields.where(
+        (e) => !e.isSynthetic && !e.isStatic,
+      )) {
         candidateFields[field.displayString()] =
             candidateFields[field.displayString()]! + 1;
       }
