@@ -36,14 +36,12 @@ sealed class SealedWithoutFactories {
   const SealedWithoutFactories._(this.baseValue);
 }
 
-@CopyWith()
 final class SealedA extends SealedWithoutFactories {
   const SealedA({required int baseValue, required this.a}) : super._(baseValue);
 
   final int a;
 }
 
-@CopyWith()
 final class SealedB extends SealedWithoutFactories {
   const SealedB({required int baseValue, required this.b}) : super._(baseValue);
 

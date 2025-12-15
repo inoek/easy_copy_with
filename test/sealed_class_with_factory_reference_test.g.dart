@@ -41,6 +41,17 @@ extension MixedImplCopyWith on MixedImpl {
   }
 }
 
+typedef SelfRedirectSealedCopyWithFn =
+    SelfRedirectSealed Function({String data});
+
+extension SelfRedirectSealedCopyWith on SelfRedirectSealed {
+  SelfRedirectSealedCopyWithFn get copyWith {
+    return switch (this) {
+      final SelfRedirectImpl x0 => x0.copyWith,
+    };
+  }
+}
+
 typedef SelfRedirectImplCopyWithFn = SelfRedirectImpl Function({String data});
 
 const Object _selfRedirectImplCopyWithPlaceholder = Object();
@@ -59,5 +70,36 @@ extension SelfRedirectImplCopyWith on SelfRedirectImpl {
     }
 
     return copyWithFn as SelfRedirectImplCopyWithFn;
+  }
+}
+
+typedef NoFactoriesSealedCopyWithFn = NoFactoriesSealed Function({String val});
+
+extension NoFactoriesSealedCopyWith on NoFactoriesSealed {
+  NoFactoriesSealedCopyWithFn get copyWith {
+    return switch (this) {
+      final NoFactoriesImpl x0 => x0.copyWith,
+    };
+  }
+}
+
+typedef NoFactoriesImplCopyWithFn = NoFactoriesImpl Function({String val});
+
+const Object _noFactoriesImplCopyWithPlaceholder = Object();
+
+extension NoFactoriesImplCopyWith on NoFactoriesImpl {
+  NoFactoriesImplCopyWithFn get copyWith {
+    final instance = this;
+    NoFactoriesImpl copyWithFn({
+      Object val = _noFactoriesImplCopyWithPlaceholder,
+    }) {
+      return NoFactoriesImpl(
+        identical(val, _noFactoriesImplCopyWithPlaceholder)
+            ? instance.val
+            : val as String,
+      );
+    }
+
+    return copyWithFn as NoFactoriesImplCopyWithFn;
   }
 }

@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.3.0] - 2025-12-15
+- Added supporting exhaustive checking for sealed classes. Before was based on factory constructors.
+- Fixed bug for generating classes with inherited fields.
+- Added supporting named constructors.
+
 ## [3.2.2] - 2025-12-12
 - Fixed behavior where inherited fields were passed to typedef
 

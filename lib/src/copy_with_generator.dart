@@ -74,7 +74,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         _generateTypedef(
           className,
           typeParameters,
-          fields.map((e) => e.displayString()).toList(),
+          fields.map((e) => '${e.type.toString()} ${e.displayName}').toList(),
         ),
       )
       ..writeln('const Object $placeholderName = Object();')
@@ -85,6 +85,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
           typeParameters: typeParameters,
           fields: fields,
           placeholderName: placeholderName,
+          contructor: _findSuitableConstructor(element)!,
         ),
       );
 
@@ -121,19 +122,31 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     }
   }
 
-  List<FieldElement> _getFields(ClassElement classElement) {
-    final targetClassFields = classElement.fields
+  List<FormalParameterElement> _getFields(ClassElement classElement) {
+    final suitableConstructor = _findSuitableConstructor(classElement)!;
+    final parameters = suitableConstructor.formalParameters;
+    final targetClassFields = parameters
         .where((field) => !field.isStatic && !field.isSynthetic)
-        .toList();
-    if (classElement.supertype?.element case final ClassElement superElement
-        when superElement.isSealed) {
-      final sealedFields = classElement.supertype?.element.fields
-          .where((field) => !field.isStatic && !field.isSynthetic)
-          .toList();
+        .map(
+          (e) => e is SuperFormalParameterElement
+              ? _getBaseElementFromSuper(e)
+              : e,
+        )
+        .toList(growable: false);
 
-      return [...?sealedFields, ...targetClassFields];
-    }
     return targetClassFields;
+  }
+
+  FormalParameterElement _getBaseElementFromSuper(
+    FormalParameterElement element,
+  ) {
+    return switch (element) {
+      SuperFormalParameterElement(:final superConstructorParameter?) =>
+        _getBaseElementFromSuper(superConstructorParameter),
+      final FieldFormalParameterElement fieldFormalElement =>
+        fieldFormalElement,
+      _ => element,
+    };
   }
 
   String _generateTypedef(
@@ -162,8 +175,9 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     required String className,
     required String classNameWithGenerics,
     required List<TypeParameterElement> typeParameters,
-    required List<FieldElement> fields,
+    required List<FormalParameterElement> fields,
     required String placeholderName,
+    required ConstructorElement contructor,
   }) {
     final typeParamsDeclaration = _typeParametersDeclaration(typeParameters);
     final typeArgs = _typeArguments(typeParameters);
@@ -187,12 +201,16 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     buffer
       ..writeln('    }) {')
-      ..writeln('      return $classNameWithGenerics(');
+      ..writeln('      return ${contructor.displayName}(');
 
     for (final field in fields) {
-      buffer.writeln(
-        '        ${field.name}: ${_fieldAssignment(field, placeholderName)},',
-      );
+      if (field.isNamed) {
+        buffer.writeln(
+          '        ${field.name}: ${_fieldAssignment(field, placeholderName)},',
+        );
+      } else if (field.isPositional) {
+        buffer.writeln('        ${_fieldAssignment(field, placeholderName)},');
+      }
     }
 
     buffer
@@ -237,7 +255,10 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     return '<$args>';
   }
 
-  String _fieldAssignment(FieldElement field, String placeholderName) {
+  String _fieldAssignment(
+    FormalParameterElement field,
+    String placeholderName,
+  ) {
     final fieldName = field.name;
     final fieldAccess = 'instance.$fieldName';
     final fieldType = field.type.getDisplayString();
@@ -258,48 +279,58 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   }
 
   String _generateForSealedClass({required ClassElement element}) {
-    final factoryRedirectedConstructorClasses = _getFactoriesFrom(element);
+    final allExhaustiveClasses = _getExhaustiveClassesFrom(
+      element,
+    ).where((e) => e != element).toList(growable: false);
 
     final generalVairablesExtension = _generateForGeneralVariablesInSealedClass(
       element: element,
-      factoryConstructors: factoryRedirectedConstructorClasses,
+      exhaustiveClasses: allExhaustiveClasses,
     );
 
-    final factoryClassesGen = factoryRedirectedConstructorClasses
+    final exhaustiveClassesGen = allExhaustiveClasses
         .map(_generateExtensionForClass)
         .toList(growable: false);
 
-    return [?generalVairablesExtension, ...factoryClassesGen].join('\n');
+    return [?generalVairablesExtension, ...exhaustiveClassesGen].join('\n');
   }
 
-  List<ClassElement> _getFactoriesFrom(ClassElement element) {
-    return element.constructors
-        .where((c) => c.isFactory)
-        .map((c) => c.redirectedConstructor?.enclosingElement)
-        .whereType<ClassElement>()
+  List<ClassElement> _getExhaustiveClassesFrom(ClassElement element) {
+    return element.library.classes
+        .where((e) => e.allSupertypes.any((e) => e.element == element))
         .toList(growable: false);
   }
 
   String? _generateForGeneralVariablesInSealedClass({
     required ClassElement element,
-    required List<ClassElement> factoryConstructors,
+    required List<ClassElement> exhaustiveClasses,
   }) {
-    final totalSameVariablesCount = factoryConstructors.length;
+    final totalSameVariablesCount = exhaustiveClasses.length;
 
-    final uniqueFieldNames = factoryConstructors
+    final fieldsFromCurrentSealedClass = element.fields
+        .where((e) => !e.isSynthetic && !e.isStatic)
+        .map((e) => e.displayString())
+        .toSet();
+
+    final fieldsFromFactoryConstructors = exhaustiveClasses
         .expand((e) => e.fields)
         .where((e) => !e.isSynthetic && !e.isStatic)
         .map((e) => e.displayString())
         .toSet();
 
+    final uniqueFieldNames = {
+      ...fieldsFromCurrentSealedClass,
+      ...fieldsFromFactoryConstructors,
+    };
+
     final candidateFields = {for (final name in uniqueFieldNames) name: 0};
 
-    for (final factory in factoryConstructors) {
-      for (final field in factory.fields.where(
-        (e) => !e.isSynthetic && !e.isStatic,
-      )) {
-        candidateFields[field.displayString()] =
-            candidateFields[field.displayString()]! + 1;
+    for (final factory in exhaustiveClasses) {
+      for (final field in factory.fields) {
+        if (candidateFields.containsKey(field.displayString())) {
+          candidateFields[field.displayString()] =
+              candidateFields[field.displayString()]! + 1;
+        }
       }
     }
 
@@ -322,7 +353,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
           className: className,
           classNameWithGenerics: classNameWithGenerics,
           typeParameters: typeParameters,
-          factories: _getFactoriesFrom(element),
+          factories: _getExhaustiveClassesFrom(element),
         ),
       );
 
