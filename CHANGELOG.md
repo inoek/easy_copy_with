@@ -1,7 +1,7 @@
 # Changelog
 
 ## [3.3.0] - 2025-12-15
-- Added supporting exhaustive checking for sealed classes. Before was based on factory constructors.
+- Added supporting exhaustive checking for sealed classes. Before it was based on factory constructors.
 - Fixed bug for generating classes with inherited fields.
 - Added supporting named constructors.
 
