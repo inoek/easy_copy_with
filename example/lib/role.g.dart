@@ -6,7 +6,7 @@ part of 'role.dart';
 // CopyWithGenerator
 // **************************************************************************
 
-typedef AdminCopyWithFn = Admin Function({bool isActive, int adminLevel});
+typedef AdminCopyWithFn = Admin Function({int adminLevel, bool isActive});
 
 const Object _adminCopyWithPlaceholder = Object();
 
@@ -14,16 +14,16 @@ extension AdminCopyWith on Admin {
   AdminCopyWithFn get copyWith {
     final instance = this;
     Admin copyWithFn({
-      Object isActive = _adminCopyWithPlaceholder,
       Object adminLevel = _adminCopyWithPlaceholder,
+      Object isActive = _adminCopyWithPlaceholder,
     }) {
       return Admin(
-        isActive: identical(isActive, _adminCopyWithPlaceholder)
-            ? instance.isActive
-            : isActive as bool,
         adminLevel: identical(adminLevel, _adminCopyWithPlaceholder)
             ? instance.adminLevel
             : adminLevel as int,
+        isActive: identical(isActive, _adminCopyWithPlaceholder)
+            ? instance.isActive
+            : isActive as bool,
       );
     }
 
@@ -32,7 +32,7 @@ extension AdminCopyWith on Admin {
 }
 
 typedef UserRoleCopyWithFn =
-    UserRole Function({bool isActive, String username});
+    UserRole Function({String username, bool isActive});
 
 const Object _userRoleCopyWithPlaceholder = Object();
 
@@ -40,16 +40,16 @@ extension UserRoleCopyWith on UserRole {
   UserRoleCopyWithFn get copyWith {
     final instance = this;
     UserRole copyWithFn({
-      Object isActive = _userRoleCopyWithPlaceholder,
       Object username = _userRoleCopyWithPlaceholder,
+      Object isActive = _userRoleCopyWithPlaceholder,
     }) {
       return UserRole(
-        isActive: identical(isActive, _userRoleCopyWithPlaceholder)
-            ? instance.isActive
-            : isActive as bool,
         username: identical(username, _userRoleCopyWithPlaceholder)
             ? instance.username
             : username as String,
+        isActive: identical(isActive, _userRoleCopyWithPlaceholder)
+            ? instance.isActive
+            : isActive as bool,
       );
     }
 
