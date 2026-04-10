@@ -50,10 +50,10 @@ app.*.map.json
 
 # Keep generated example and test outputs so the published example works out
 # of the box and analyzer can run without codegen.
-!example/*.g.dart
-!example/lib/**/*.g.dart
-!test/*.g.dart
-!test/**/*.g.dart
+!easy_copy_with/example/*.g.dart
+!easy_copy_with/example/lib/**/*.g.dart
+!easy_copy_with/test/*.g.dart
+!easy_copy_with/test/**/*.g.dart
 
 # Coverage
 coverage/
