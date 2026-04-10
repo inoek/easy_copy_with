@@ -1,9 +1,13 @@
 # Changelog
 
-## [3.4.0] - 2026-04-09
-- Widened `analyzer` constraint to `>=8.1.1 <11.0.0` so the package can be used alongside other code generators pinned to analyzer 9.x / 10.x (e.g. `freezed 3.2.5`). No code changes required on the user side.
-- Internal refactor: isolated all `package:analyzer` usage behind a single `element_reader.dart` adapter that transforms the analyzer element model into a pure-Dart model (`lib/src/model.dart`). The code emitter (`copy_with_emitter.dart`) and the generator (`copy_with_generator.dart`) are now analyzer-free. Future analyzer breaking changes only require touching the reader. Generated output is byte-for-byte identical to 3.3.0.
-- Silenced `isSynthetic` deprecation warnings in analyzer >=9 while keeping the API call (the deprecated replacement `isOriginX` isn't available in analyzer 8.x, so the deprecated member is intentionally kept for cross-version compatibility).
+## easy_copy_with [4.0.0] - 2026-04-10
+- **BREAKING**: Split into two packages: `easy_copy_with` (generator, dev dependency) and `easy_copy_with_annotation` (annotations, regular dependency).
+- Widened `analyzer` constraint to `>=8.1.1 <11.0.0` for compatibility with freezed, json_serializable, and other generators on analyzer 9.x/10.x.
+- Internal refactor: isolated `package:analyzer` usage behind an adapter layer. Generated output is identical to 3.3.0.
+- Requires Dart SDK `^3.10.0`.
+
+## easy_copy_with_annotation [1.0.0] - 2026-04-10
+- Initial release. Extracted `@CopyWith()` annotation from `easy_copy_with`.
 
 ## [3.3.0] - 2025-12-15
 - Added supporting exhaustive checking for sealed classes. Before it was based on factory constructors.

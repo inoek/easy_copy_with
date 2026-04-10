@@ -9,10 +9,8 @@ environment:
   sdk: ^3.10.0
 
 dependencies:
-  easy_copy_with_annotation:
-    path: ../../easy_copy_with_annotation
+  easy_copy_with_annotation: ^1.0.0
 
 dev_dependencies:
-  easy_copy_with:
-    path: ../
+  easy_copy_with: ^4.0.0
   build_runner: ^2.10.4

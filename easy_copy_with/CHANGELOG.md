@@ -4,6 +4,10 @@
 - **BREAKING**: Extracted `CopyWith` annotation into separate `easy_copy_with_annotation` package.
   - Replace `import 'package:easy_copy_with/annotations.dart'` with `import 'package:easy_copy_with_annotation/easy_copy_with_annotation.dart'`
   - Add `easy_copy_with_annotation` to `dependencies` in your `pubspec.yaml`
+  - Move `easy_copy_with` to `dev_dependencies`
+- Widened `analyzer` constraint to `>=8.1.1 <11.0.0` for compatibility with freezed, json_serializable, and other generators on analyzer 9.x/10.x.
+- Internal refactor: isolated `package:analyzer` usage behind an adapter layer. Generated output is identical to 3.3.0.
+- Requires Dart SDK `^3.10.0`.
 
 ## [3.3.0] - 2025-12-15
 - Added supporting exhaustive checking for sealed classes. Before it was based on factory constructors.
