@@ -135,13 +135,10 @@ ConstructorElement? _findSuitableConstructor(ClassElement classElement) {
   if (unnamed != null && !unnamed.isPrivate && !unnamed.isFactory) {
     return unnamed;
   }
-  try {
-    return classElement.constructors.firstWhere(
-      (c) => !c.isPrivate && !c.isFactory,
-    );
-  } catch (_) {
-    return null;
-  }
+  final constructors = classElement.constructors.where(
+    (c) => !c.isPrivate && !c.isFactory,
+  );
+  return constructors.isEmpty ? null : constructors.first;
 }
 
 List<ParamInfo> _readParams(ConstructorElement constructor) {
