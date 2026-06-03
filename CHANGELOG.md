@@ -1,5 +1,14 @@
 # Changelog
 
+## easy_copy_with [5.0.0] - 2026-06-03
+- **BREAKING**: Updated the generator to `analyzer` `^13.0.0`.
+- **BREAKING**: Requires Dart SDK `^3.11.0`, matching the analyzer 13 toolchain.
+- Updated generator build/test dependency constraints for analyzer 13 compatibility.
+
+## easy_copy_with_annotation [1.0.1] - 2026-06-03
+- Updated documentation to reference `easy_copy_with` `^5.0.0`.
+- Updated dev dependency constraints for the analyzer 13 toolchain.
+
 ## easy_copy_with [4.0.0] - 2026-04-10
 - **BREAKING**: Split into two packages: `easy_copy_with` (generator, dev dependency) and `easy_copy_with_annotation` (annotations, regular dependency).
 - Widened `analyzer` constraint to `>=8.1.1 <11.0.0` for compatibility with freezed, json_serializable, and other generators on analyzer 9.x/10.x.

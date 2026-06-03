@@ -9,13 +9,7 @@
 /// When `package:analyzer` ships a breaking change, the fix is contained
 /// to this file — the generator and the emitter stay untouched.
 ///
-/// `isSynthetic` is marked `@Deprecated` in analyzer >= 9 in favour of
-/// the `isOriginX` family, but those replacements don't exist in analyzer
-/// 8.x. Until we drop 8.x support we intentionally keep the deprecated
-/// member to stay compatible across analyzer 8.x / 9.x / 10.x.
 library;
-
-// ignore_for_file: deprecated_member_use
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
@@ -143,7 +137,7 @@ ConstructorElement? _findSuitableConstructor(ClassElement classElement) {
 
 List<ParamInfo> _readParams(ConstructorElement constructor) {
   return constructor.formalParameters
-      .where((p) => !p.isStatic && !p.isSynthetic)
+      .where((p) => !p.isStatic)
       .map(
         (p) => p is SuperFormalParameterElement ? _unwrapSuper(p) : p,
       )
@@ -182,13 +176,13 @@ List<String> _computeSharedFieldDeclarations({
   required List<ClassElement> subclasses,
 }) {
   final fieldsFromSealed = sealed.fields
-      .where((e) => !e.isSynthetic && !e.isStatic)
+      .where(_isDeclaredInstanceField)
       .map((e) => e.displayString())
       .toSet();
 
   final fieldsFromSubs = subclasses
       .expand((e) => e.fields)
-      .where((e) => !e.isSynthetic && !e.isStatic)
+      .where(_isDeclaredInstanceField)
       .map((e) => e.displayString())
       .toSet();
 
@@ -210,4 +204,10 @@ List<String> _computeSharedFieldDeclarations({
       .where((e) => e.value == total)
       .map((e) => e.key)
       .toList(growable: false);
+}
+
+bool _isDeclaredInstanceField(FieldElement element) {
+  return !element.isStatic &&
+      (element.isOriginDeclaration ||
+          element.isOriginDeclaringFormalParameter);
 }

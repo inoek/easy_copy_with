@@ -9,11 +9,11 @@ Code generator for automatic `copyWith` methods in Dart classes using the `@Copy
 
 ```yaml
 dependencies:
-  easy_copy_with_annotation: ^1.0.0
+  easy_copy_with_annotation: ^1.0.1
 
 dev_dependencies:
-  easy_copy_with: ^4.0.0
-  build_runner: ^2.10.4
+  easy_copy_with: ^5.0.0
+  build_runner: ^2.15.0
 ```
 
 ## Quick Start
@@ -79,7 +79,7 @@ final class UserRole extends Role {
 
 ## Migration from 3.x
 
-1. Add `easy_copy_with_annotation: ^1.0.0` to `dependencies`
+1. Add `easy_copy_with_annotation: ^1.0.1` to `dependencies`
 2. Move `easy_copy_with` to `dev_dependencies`
 3. Replace imports:
    - `import 'package:easy_copy_with/annotations.dart'` -> `import 'package:easy_copy_with_annotation/easy_copy_with_annotation.dart'`

@@ -10,11 +10,11 @@ Add `easy_copy_with_annotation` as a dependency and `easy_copy_with` as a dev de
 
 ```yaml
 dependencies:
-  easy_copy_with_annotation: ^1.0.0
+  easy_copy_with_annotation: ^1.0.1
 
 dev_dependencies:
-  easy_copy_with: ^4.0.0
-  build_runner: ^2.10.4
+  easy_copy_with: ^5.0.0
+  build_runner: ^2.15.0
 ```
 
 Annotate your classes:
