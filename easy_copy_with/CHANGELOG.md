@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.0.0] - 2026-06-03
+- **BREAKING**: Updated the generator to `analyzer` `^13.0.0`.
+- **BREAKING**: Requires Dart SDK `^3.11.0`, matching the analyzer 13 toolchain.
+- Updated `build`, `source_gen`, `build_runner`, `build_test`, `source_gen_test`, `test`, and `equatable` constraints to versions compatible with analyzer 13.
+
 ## [4.0.0] - 2026-04-10
 - **BREAKING**: Extracted `CopyWith` annotation into separate `easy_copy_with_annotation` package.
   - Replace `import 'package:easy_copy_with/annotations.dart'` with `import 'package:easy_copy_with_annotation/easy_copy_with_annotation.dart'`

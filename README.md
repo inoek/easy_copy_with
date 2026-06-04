@@ -15,11 +15,11 @@ Automatic generation of `copyWith` methods for Dart classes.
 
 ```yaml
 dependencies:
-  easy_copy_with_annotation: ^1.0.0
+  easy_copy_with_annotation: ^1.0.1
 
 dev_dependencies:
-  easy_copy_with: ^4.0.0
-  build_runner: ^2.10.4
+  easy_copy_with: ^5.0.0
+  build_runner: ^2.15.0
 ```
 
 ```dart

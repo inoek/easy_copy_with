@@ -1,6 +1,6 @@
 name: easy_copy_with_annotation
 description: Annotations for the easy_copy_with code generator. Add @CopyWith() to your Dart classes.
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/inoek/easy_copy_with
 repository: https://github.com/inoek/easy_copy_with
 issue_tracker: https://github.com/inoek/easy_copy_with/issues
@@ -15,5 +15,5 @@ environment:
   sdk: ^3.0.0
 
 dev_dependencies:
-  test: ^1.26.3
+  test: ^1.31.1
   lints: ^6.0.0
